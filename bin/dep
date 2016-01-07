@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 /* (c) Anton Medvedev <anton@elfet.ru>
  *
@@ -29,7 +28,7 @@ set_include_path(__DIR__ . '/../' . PATH_SEPARATOR . get_include_path());
 
 // Init Deployer
 $deployer = new \Deployer\Deployer(
-    new \Symfony\Component\Console\Application('Deployer', '2.0.2'),
+    new \Symfony\Component\Console\Application('Deployer', '2.0.5-notimeout-smartreconnect'),
     new \Symfony\Component\Console\Input\ArgvInput(),
     new \Symfony\Component\Console\Output\ConsoleOutput()
 );
@@ -41,12 +40,14 @@ if (is_file($deployFile) && is_readable($deployFile)) {
     require $deployFile;
 }
 
+/** since we are using a modified version of deployer self-update should be disabled
 // Self-update command
 $selfUpdate = new \KevinGH\Amend\Command('self-update');
 $selfUpdate->setDescription('Updates deployer.phar to the latest version');
 $selfUpdate->setManifestUri('http://deployer.org/manifest.json');
 $deployer->getConsole()->add($selfUpdate);
 $deployer->getHelperSet()->set(new \KevinGH\Amend\Helper());
+*/
 
 // Run Deployer
 $deployer->run();

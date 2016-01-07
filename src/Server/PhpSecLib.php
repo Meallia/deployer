@@ -17,6 +17,13 @@ class PhpSecLib extends AbstractServer
      */
     private $sftp;
 
+
+    /**
+     * Used to tells if it's necessary to restart the connection
+     * @var int
+     */
+    private $lastConnectionRefresh = 0;
+
     /**
      * Array of created directories during upload.
      * @var array
@@ -29,6 +36,9 @@ class PhpSecLib extends AbstractServer
     public function connect()
     {
         $this->sftp = new SFTP($this->config->getHost(), $this->config->getPort());
+
+        //long timeout since we might use very long commands such as tar.xz or composer update
+        $this->sftp->setTimeout(10000);
 
         switch ($this->config->getAuthenticationMethod()) {
             case Configuration::AUTH_BY_PASSWORD:
@@ -71,9 +81,12 @@ class PhpSecLib extends AbstractServer
      */
     public function checkConnection()
     {
-        if (null === $this->sftp) {
+        //connect if not used for 10 seconds
+        if (microtime(true) - $this->lastConnectionRefresh > 10 ) {
             $this->connect();
         }
+
+        $this->lastConnectionRefresh = microtime(true);
     }
 
     /**
